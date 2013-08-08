@@ -30,9 +30,9 @@
 			    });
 			});
 		});
-    };
+	};
 	var methods = {
-			init: function(settings){
+		init: function(settings){
 				return this.each(function(){
 					var self = this;
 					methods.config = {
