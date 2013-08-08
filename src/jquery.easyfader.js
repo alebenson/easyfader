@@ -34,25 +34,24 @@
 	var methods = {
 		init: function(settings){
 				return this.each(function(){
-					var self = this;
-					methods.config = {
-						slideDur: 7000,
-						fadeDur: 800,
-						onFadeStart: null,
-						onFadeEnd: null,
-						$container: $(self),
-						slideSelector: '.slide',
-						fading: false,
-						firstLoad: true,
-						slideTimer: null,
-						activeSlide: null,
-						newSlide: null,
-						$slides: null,
-						totalSlides: null,
-						$pagerList: null,
-						$pagers: null
-					};
-					var config = methods.config;
+					var self = this,
+						config = {
+							slideDur: 7000,
+							fadeDur: 800,
+							onFadeStart: null,
+							onFadeEnd: null,
+							$container: $(self),
+							slideSelector: '.slide',
+							fading: false,
+							firstLoad: true,
+							slideTimer: null,
+							activeSlide: null,
+							newSlide: null,
+							$slides: null,
+							totalSlides: null,
+							$pagerList: null,
+							$pagers: null
+						};
 					if(settings){
 						$.extend(config, settings);
 					};
@@ -67,28 +66,24 @@
 					config.$container.find('.pager').on('click',function(){
 						var target = $(this).attr('data-target');
 						clearTimeout(config.slideTimer);
-						methods.changeSlides(target);
+						methods.changeSlides(config, target);
 					});
 					config.$pagers = config.$pagerList.find('.pager');
 					config.$pagers.eq(0).addClass('active');
-					methods.animateSlides(1, 0);
+					methods.animateSlides(config, 1, 0);
 				});
 			},
-			cleanUp: function(activeNdx, newNdx){
-				var self = this,
-					config = self.config;
+			cleanUp: function(config, activeNdx, newNdx){
 				config.$slides.eq(activeNdx).removeStyle('opacity, z-index');
 				config.$slides.eq(newNdx).removeStyle(config.prefix+'transition, transition');
 				config.activeSlide = newNdx;
 				config.fading = false;
-				methods.waitForNext();
+				methods.waitForNext(config);
 				if(typeof config.onFadeEnd == 'function'){
 					config.onFadeEnd.call(this, config.$slides.eq(config.activeSlide));
 				};
 			},
-			animateSlides: function(activeNdx, newNdx){
-				var self = this,
-					config = self.config;
+			animateSlides: function(config, activeNdx, newNdx){
 				if(config.fading || activeNdx == newNdx){
 					return false;
 				};
@@ -102,7 +97,7 @@
 				if(!config.prefix){
 					config.$slides.eq(newNdx).animate({'opacity': 1}, config.fadeDur,
 					function(){
-						methods.cleanUp(activeNdx, newNdx);
+						methods.cleanUp(config, activeNdx, newNdx);
 					});
 				} else {
 					var styles = {};
@@ -110,13 +105,11 @@
 					styles['opacity'] = 1;
 					config.$slides.eq(newNdx).css(styles);
 					var fadeTimer = setTimeout(function(){
-						methods.cleanUp(activeNdx, newNdx);
+						methods.cleanUp(config, activeNdx, newNdx);
 					},config.fadeDur);
 				};
 			},
-			changeSlides: function(target){
-				var self = this,
-					config = self.config;
+			changeSlides: function(config, target){
 				if(target == 'next'){
 					config.newSlide = config.activeSlide + 1;
 					if(config.newSlide > config.totalSlides - 1){
@@ -130,14 +123,12 @@
 				} else {
 					config.newSlide = target;
 				};
-				methods.animateSlides(config.activeSlide, config.newSlide);
+				methods.animateSlides(config, config.activeSlide, config.newSlide);
 			},
-			waitForNext: function(){
-				var self = this,
-					config = self.config;
+			waitForNext: function(config){
 				config.firstLoad = false;
 				config.slideTimer = setTimeout(function(){
-					methods.changeSlides('next');
+					methods.changeSlides(config, 'next');
 				},config.slideDur);
 			}
 		};
