@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.3
+* Version: 1.4
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -32,102 +32,115 @@
 		});
     };
 	var methods = {
-		init: function(settings){
-			return this.each(function(){
-				var config = {
-					slideDur: 7000,
-					fadeDur: 800,
-					onFadeStart: null,
-					onFadeEnd: null
-				};
-				if(settings){
-					$.extend(config, settings);
-				};
-				this.config = config;
-				var $container = $(this),
-					slideSelector = '.slide',
-					fading = false,
-					firstLoad = true,
-					slideTimer,
-					activeSlide,
-					newSlide,
-					$slides = $container.find(slideSelector),
-					totalSlides = $slides.length,
-					$pagerList = $container.find('.pager_list');
-					prefix = $.support.leadingWhitespace ? prefix($container[0]) : false;
-				function animateSlides(activeNdx, newNdx){
-					function cleanUp(){
-						$slides.eq(activeNdx).removeStyle('opacity, z-index');
-						$slides.eq(newNdx).removeStyle(prefix+'transition, transition');
-						activeSlide = newNdx;
-						fading = false;
-						waitForNext();
-						if(typeof config.onFadeEnd == 'function'){
-							config.onFadeEnd.call(this, $slides.eq(activeSlide));
-						};
+			init: function(settings){
+				return this.each(function(){
+					var self = this;
+					methods.config = {
+						slideDur: 7000,
+						fadeDur: 800,
+						onFadeStart: null,
+						onFadeEnd: null,
+						$container: $(self),
+						slideSelector: '.slide',
+						fading: false,
+						firstLoad: true,
+						slideTimer: null,
+						activeSlide: null,
+						newSlide: null,
+						$slides: null,
+						totalSlides: null,
+						$pagerList: null,
+						$pagers: null
 					};
-					if(fading || activeNdx == newNdx){
-						return false;
+					var config = methods.config;
+					if(settings){
+						$.extend(config, settings);
 					};
-					fading = true;
-					if(typeof config.onFadeStart == 'function' && !firstLoad){
-						config.onFadeStart.call(this, $slides.eq(newSlide));
+					config.$slides = config.$container.find(config.slideSelector);
+					config.totalSlides = config.$slides.length;
+					config.$pagerList = config.$container.find('.pager_list');
+					config.prefix = $.support.leadingWhitespace ? prefix(config.$container[0]) : false;
+					for(var i = 0; i < config.totalSlides; i++){
+						config.$pagerList
+							.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
 					};
-					$pagers.removeClass('active').eq(newSlide).addClass('active');
-					$slides.eq(activeNdx).css('z-index', 2);
-					$slides.eq(newNdx).css('z-index', 3);
-					if(!prefix){
-						$slides.eq(newNdx).animate({'opacity': 1}, config.fadeDur,
-						function(){
-							cleanUp();
-						});
-					} else {
-						var styles = {};
-						styles[prefix+'transition'] = 'opacity '+config.fadeDur+'ms';
-						styles['opacity'] = 1;
-						$slides.eq(newNdx).css(styles);
-						var fadeTimer = setTimeout(function(){
-							cleanUp();
-						},config.fadeDur);
-					};
-				};
-				function changeSlides(target){
-					if(target == 'next'){
-						newSlide = activeSlide + 1;
-						if(newSlide > totalSlides - 1){
-							newSlide = 0;
-						}
-					} else if(target == 'prev'){
-						newSlide = activeSlide - 1;
-						if(newSlide < 0){
-							newSlide = totalSlides - 1;
-						};
-					} else {
-						newSlide = target;
-					};
-					animateSlides(activeSlide, newSlide);
-				};
-				function waitForNext(){
-					firstLoad = false;
-					slideTimer = setTimeout(function(){
-						changeSlides('next');
-					},config.slideDur);
-				};
-				for(var i = 0; i < totalSlides; i++){
-					$pagerList
-						.append('<li class="page" data-target="'+i+'">'+i+'</li>');
-				};
-				$container.find('.page').bind('click',function(){
-					var target = $(this).attr('data-target');
-					clearTimeout(slideTimer);
-					changeSlides(target);
+					config.$container.find('.pager').on('click',function(){
+						var target = $(this).attr('data-target');
+						clearTimeout(config.slideTimer);
+						methods.changeSlides(target);
+					});
+					config.$pagers = config.$pagerList.find('.pager');
+					config.$pagers.eq(0).addClass('active');
+					methods.animateSlides(1, 0);
 				});
-				var $pagers = $pagerList.find('.page');
-				$pagers.eq(0).addClass('active');
-				animateSlides(1, 0);
-			});
-		}
-	};
+			},
+			cleanUp: function(activeNdx, newNdx){
+				var self = this,
+					config = self.config;
+				config.$slides.eq(activeNdx).removeStyle('opacity, z-index');
+				config.$slides.eq(newNdx).removeStyle(config.prefix+'transition, transition');
+				config.activeSlide = newNdx;
+				config.fading = false;
+				methods.waitForNext();
+				if(typeof config.onFadeEnd == 'function'){
+					config.onFadeEnd.call(this, config.$slides.eq(config.activeSlide));
+				};
+			},
+			animateSlides: function(activeNdx, newNdx){
+				var self = this,
+					config = self.config;
+				if(config.fading || activeNdx == newNdx){
+					return false;
+				};
+				config.fading = true;
+				if(typeof config.onFadeStart == 'function' && !config.firstLoad){
+					config.onFadeStart.call(this, config.$slides.eq(config.newSlide));
+				};
+				config.$pagers.removeClass('active').eq(config.newSlide).addClass('active');
+				config.$slides.eq(activeNdx).css('z-index', 2);
+				config.$slides.eq(newNdx).css('z-index', 3);
+				if(!config.prefix){
+					config.$slides.eq(newNdx).animate({'opacity': 1}, config.fadeDur,
+					function(){
+						methods.cleanUp(activeNdx, newNdx);
+					});
+				} else {
+					var styles = {};
+					styles[config.prefix+'transition'] = 'opacity '+config.fadeDur+'ms';
+					styles['opacity'] = 1;
+					config.$slides.eq(newNdx).css(styles);
+					var fadeTimer = setTimeout(function(){
+						methods.cleanUp(activeNdx, newNdx);
+					},config.fadeDur);
+				};
+			},
+			changeSlides: function(target){
+				var self = this,
+					config = self.config;
+				if(target == 'next'){
+					config.newSlide = config.activeSlide + 1;
+					if(config.newSlide > config.totalSlides - 1){
+						config.newSlide = 0;
+					}
+				} else if(target == 'prev'){
+					config.newSlide = config.activeSlide - 1;
+					if(config.newSlide < 0){
+						config.newSlide = config.totalSlides - 1;
+					};
+				} else {
+					config.newSlide = target;
+				};
+				methods.animateSlides(config.activeSlide, config.newSlide);
+			},
+			waitForNext: function(){
+				var self = this,
+					config = self.config;
+				config.firstLoad = false;
+				config.slideTimer = setTimeout(function(){
+					methods.changeSlides('next');
+				},config.slideDur);
+			}
+		};
 	$.fn.easyFader = function(settings){
 		return methods.init.apply(this, arguments);
 	};
