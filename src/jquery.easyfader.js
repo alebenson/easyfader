@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.5
+* Version: 1.6
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -8,6 +8,24 @@
 * Copyright 2013 Patrick Kunka, All Rights Reserved
 */
 
+function EasyFader(){
+	this.slideDur = 7000,
+	this.effectDur = 800,
+	this.onChangeStart = null,
+	this.onChangeEnd = null,
+	this.slideSelector = '.slide',
+	this.changing = false,
+	this.effect = 'fade',
+	this.firstLoad = true,
+	this.slideTimer = null,
+	this.activeSlide = null,
+	this.newSlide = null,
+	this.$slides = null,
+	this.totalSlides = null,
+	this.$pagerList = null,
+	this.$pagers = null;
+};
+	
 (function($){
 	$.fn.removeStyle = function(style){
 		return this.each(function(){
@@ -39,23 +57,6 @@
 		}; 
 		return "transition" in el.style ? "" : false;
 	};
-
-	function EasyFader(){
-		this.slideDur = 7000,
-		this.fadeDur = 800,
-		this.onFadeStart = null,
-		this.onFadeEnd = null,
-		this.slideSelector = '.slide',
-		this.fading = false,
-		this.firstLoad = true,
-		this.slideTimer = null,
-		this.activeSlide = null,
-		this.newSlide = null,
-		this.$slides = null,
-		this.totalSlides = null,
-		this.$pagerList = null,
-		this.$pagers = null;
-	};
 	
 	EasyFader.prototype = {
 		constructor: EasyFader,
@@ -82,46 +83,60 @@
 			});
 			self.$pagers = self.$pagerList.find('.pager');
 			self.$pagers.eq(0).addClass('active');
-			self.animateSlides(1, 0);
+			self.fadeSlides(1, 0);
 		},
 		cleanUp: function(activeNdx, newNdx){
+			var self = this;
+			if(self.firstLoad){
+				self.fadeCleanUp(activeNdx, newNdx);
+			} else {
+				self[self.effect+'CleanUp'](activeNdx, newNdx);
+			};
+			self.activeSlide = newNdx;
+			self.changing = false;
+			self.waitForNext();
+			if(typeof self.onChangeEnd == 'function'){
+				self.onChangeEnd.call(this, self.$slides.eq(self.activeSlide));
+			};
+		},
+		fadeCleanUp: function(activeNdx, newNdx){
 			var self = this;
 			
 			self.$slides.eq(activeNdx).removeStyle('opacity, z-index');
 			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
-			self.activeSlide = newNdx;
-			self.fading = false;
-			self.waitForNext();
-			if(typeof self.onFadeEnd == 'function'){
-				self.onFadeEnd.call(this, self.$slides.eq(self.activeSlide));
-			};
 		},
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			if(self.fading || activeNdx == newNdx){
+			if(self.changing || activeNdx == newNdx){
 				return false;
 			};
-			self.fading = true;
-			if(typeof self.onFadeStart == 'function' && !self.firstLoad){
-				self.onFadeStart.call(this, self.$slides.eq(self.newSlide));
+			self.changing = true;
+			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
+				self.onChangeStart.call(this, self.$slides.eq(self.newSlide));
 			};
+			
+			self[self.effect+'Slides'](activeNdx, newNdx);
+		},
+		fadeSlides: function(activeNdx, newNdx){
+			var self = this;
+			
 			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
 			self.$slides.eq(activeNdx).css('z-index', 2);
 			self.$slides.eq(newNdx).css('z-index', 3);
 			if(!self.prefix){
-				self.$slides.eq(newNdx).animate({'opacity': 1}, self.fadeDur,
+				self.$slides.eq(newNdx).animate({'opacity': 1}, self.effectDur,
 				function(){
 					self.cleanUp(activeNdx, newNdx);
 				});
 			} else {
 				var styles = {};
-				styles[self.prefix+'transition'] = 'opacity '+self.fadeDur+'ms';
+				styles[self.prefix+'transition'] = 'opacity '+self.effectDur+'ms';
 				styles['opacity'] = 1;
 				self.$slides.eq(newNdx).css(styles);
 				var fadeTimer = setTimeout(function(){
 					self.cleanUp(activeNdx, newNdx);
-				},self.fadeDur);
+				},self.effectDur);
 			};
 		},
 		changeSlides: function(target){
