@@ -1,5 +1,11 @@
 /*
-* EASYSLIDER
+* EASYFADER - "SLIDE" EXTENSION
+* Version: 1.0
+* License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
+* http://creativecommons.org/licenses/by/3.0/
+* This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
+* Author: Patrick Kunka
+* Copyright 2013 Patrick Kunka, All Rights Reserved
 */
 
 (function($){
@@ -75,7 +81,7 @@
 					$actors.removeStyle('left');
 				} else {
 					$actors
-						.unbind('transitionend otransitionend')
+						.unbind('webkitTransitionEnd transitionend')
 						.removeStyle(self.prefix+'transition, '+self.prefix+'transform, transition, transform');
 				};
 					
@@ -83,6 +89,6 @@
 			}
 		});
 	} else {
-		console.error('EasySlider requires EasyFader');
+		console.error('EasyFader core not found');
 	};
 })(jQuery);
