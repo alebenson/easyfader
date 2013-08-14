@@ -78,14 +78,26 @@ var EasyFader;
 				self.$pagerList
 					.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
 			};
+			self.bindHandlers();
+			self.$pagers = self.$pagerList.find('.pager');
+			self.$pagers.eq(0).addClass('active');
+			self.fadeSlides(1, 0);
+		},
+		bindHandlers: function(){
+			var self = this;
 			self.$container.find('.pager').on('click',function(){
 				var target = $(this).attr('data-target');
 				clearTimeout(self.slideTimer);
 				self.changeSlides(target);
 			});
-			self.$pagers = self.$pagerList.find('.pager');
-			self.$pagers.eq(0).addClass('active');
-			self.fadeSlides(1, 0);
+			$(window).on('keydown', function(e){
+					var key = e.keyCode;
+					if(key == 39 || 37){
+						var dir = key == 39 ? 'next' : 'prev';
+						clearTimeout(self.slideTimer);
+						self.changeSlides(dir);
+					}
+			});
 		},
 		cleanUp: function(activeNdx, newNdx){
 			var self = this;
@@ -107,7 +119,7 @@ var EasyFader;
 			self.$slides.eq(activeNdx).removeStyle('opacity, z-index');
 			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
 		},
-		animateSlides: function(activeNdx, newNdx, direction){
+		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
 			if(self.changing || activeNdx == newNdx){
@@ -119,7 +131,7 @@ var EasyFader;
 				self.onChangeStart.call(this, self.$slides.eq(self.newSlide));
 			};
 			
-			self[self.effect+'Slides'](activeNdx, newNdx, direction);
+			self[self.effect+'Slides'](activeNdx, newNdx);
 		},
 		fadeSlides: function(activeNdx, newNdx){
 			var self = this;
@@ -157,7 +169,7 @@ var EasyFader;
 			} else {
 				self.newSlide = target;
 			};
-			self.animateSlides(self.activeSlide, self.newSlide, target);
+			self.animateSlides(self.activeSlide, self.newSlide);
 		},
 		waitForNext: function(){
 			var self = this;

@@ -5,62 +5,84 @@
 (function($){
 	if(typeof EasyFader === 'function'){
 		$.extend(EasyFader.prototype,{
-			slideSlides: function(activeNdx, newNdx, direction){
+			slideSlides: function(activeNdx, newNdx){
 				
 				var	self = this,
 					$activeSlide = self.$slides.eq(activeNdx),
 					$newSlide = self.$slides.eq(newNdx),
-					$actors = $activeSlide.add($newSlide);
+					$actors = $activeSlide.add($newSlide),
+					activeX = activeNdx < newNdx ? '-100%' : '100%',
+					newX = activeNdx < newNdx ? '100%' : '-100%';
+					
+					if(newNdx == 0 && activeNdx == self.$slides.length - 1){
+						activeX = '-100%',
+						newX = '100%';
+					};
+					
+					if(activeNdx == 0 && newNdx == self.$slides.length - 1){
+						activeX = '100%',
+						newX = '-100%';
+					};
 				
 				if(!self.prefix){
-					// IE
+					$newSlide
+						.css({
+							left: newX,
+							opacity: 1,
+							zIndex: 3
+						})
+						.animate({left: 0}, self.effectDur);
+						
+					$activeSlide.animate({left: activeX}, self.effectDur, function(){
+						self.cleanUp(activeNdx, newNdx);
+					});
 				} else {
-						var activeX = activeNdx < newNdx ? '-100%' : '100%',
-							newX = activeNdx < newNdx ? '100%' : '-100%';
+					function applyTransitions(){
+						var done = false;
+						$actors
+							.css(self.getPrefixedCSS('transition', 'transform '+self.effectDur+' ease-in-out' ,true))
+							.bind('webkitTransitionEnd transitionend',function(e){
+								if((e.originalEvent.propertyName == 'transform' || self.prefix+'transform') && !done){
+									done = true;
+									self.cleanUp(activeNdx, newNdx);
+								};
+							});
+						requestAnimationFrame(animate);
+					};
+					
+					function animate(){
+						$activeSlide.css(self.getPrefixedCSS('transform','translate3d('+activeX+',0,0)'));
+						$newSlide.css(self.getPrefixedCSS('transform','translate3d(0,0,0)'));
+					};
+					
+					$newSlide
+						.css({
+							opacity:1,
+							zIndex: 3
+						})
+						.css(self.getPrefixedCSS('transform','translate3d('+newX+',0,0)'));
 						
-						function applyTransitions(){
-							var done = false;
-							$actors
-								.css(self.getPrefixedCSS('transition', 'transform '+self.effectDur+' ease-in-out' ,true))
-								.bind('webkitTransitionEnd transitionend',function(e){
-									if((e.originalEvent.propertyName == 'transform' || self.prefix+'transform') && !done){
-										done = true;
-										self.cleanUp(activeNdx, newNdx);
-									};
-								});
-							requestAnimationFrame(animate);
-						};
-						
-						function animate(){
-							$activeSlide
-								.css(self.getPrefixedCSS('transform','translate3d('+activeX+',0,0)'));
-							$newSlide
-								.css(self.getPrefixedCSS('transform','translate3d(0,0,0)'));
-						};
-						
-						$newSlide
-							.css({
-								opacity:1,
-								zIndex: 3
-							})
-							.css(self.getPrefixedCSS('transform','translate3d('+newX+',0,0)'));
-						requestAnimationFrame(applyTransitions);
-				};	
+					requestAnimationFrame(applyTransitions);
+				};
 			},
 			slideCleanUp: function(activeNdx, newNdx){
 				var	self = this,
 					$activeSlide = self.$slides.eq(activeNdx),
 					$newSlide = self.$slides.eq(newNdx),
 					$actors = $activeSlide.add($newSlide);
-				
-				$actors
-					.unbind('transitionend otransitionend')
-					.removeStyle(self.prefix+'transition, '+self.prefix+'transform, transition, transform');
+					
+				if(!self.prefix){
+					$actors.removeStyle('left');
+				} else {
+					$actors
+						.unbind('transitionend otransitionend')
+						.removeStyle(self.prefix+'transition, '+self.prefix+'transform, transition, transform');
+				};
 					
 				$activeSlide.removeStyle('opacity, z-index');
 			}
 		});
 	} else {
-		console.log('EasySlider requires EasyFader');
+		console.error('EasySlider requires EasyFader');
 	};
 })(jQuery);
