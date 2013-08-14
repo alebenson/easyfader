@@ -8,41 +8,25 @@
 * Copyright 2013 Patrick Kunka, All Rights Reserved
 */
 
-function EasyFader(){
-	this.slideDur = 7000,
-	this.effectDur = 800,
-	this.onChangeStart = null,
-	this.onChangeEnd = null,
-	this.slideSelector = '.slide',
-	this.changing = false,
-	this.effect = 'fade',
-	this.firstLoad = true,
-	this.slideTimer = null,
-	this.activeSlide = null,
-	this.newSlide = null,
-	this.$slides = null,
-	this.totalSlides = null,
-	this.$pagerList = null,
-	this.$pagers = null;
-};
+var EasyFader;
 	
 (function($){
 	$.fn.removeStyle = function(style){
 		return this.each(function(){
-			var obj = $(this);
+			var $obj = $(this);
 			style = style.replace(/\s+/g, '');
 			var styles = style.split(',');
 			$.each(styles,function(){
 				var search = new RegExp(this.toString() + '[^;]+;?', 'g');
-				obj.attr('style', function(i, style){
+				$obj.attr('style', function(i, style){
 					if(style) return style.replace(search, '');
 			    });
 			});
-			if(typeof obj.attr('style') !== 'undefined'){
-				var cleanStyle = obj.attr('style').replace(/\s{2,}/g, ' ').trim();
-				obj.attr('style', cleanStyle);
+			if(typeof $obj.attr('style') !== 'undefined'){
+				var cleanStyle = $obj.attr('style').replace(/\s{2,}/g, ' ').trim();
+				$obj.attr('style', cleanStyle);
 				if(cleanStyle == ''){
-					obj.removeAttr('style');
+					$obj.removeAttr('style');
 				};
 			}
 		});
@@ -56,6 +40,24 @@ function EasyFader(){
 			};
 		}; 
 		return "transition" in el.style ? "" : false;
+	};
+	
+	EasyFader = function(){
+		this.slideDur = 7000,
+		this.effectDur = 800,
+		this.onChangeStart = null,
+		this.onChangeEnd = null,
+		this.slideSelector = '.slide',
+		this.changing = false,
+		this.effect = 'fade',
+		this.firstLoad = true,
+		this.slideTimer = null,
+		this.activeSlide = null,
+		this.newSlide = null,
+		this.$slides = null,
+		this.totalSlides = null,
+		this.$pagerList = null,
+		this.$pagers = null;
 	};
 	
 	EasyFader.prototype = {
@@ -105,23 +107,23 @@ function EasyFader(){
 			self.$slides.eq(activeNdx).removeStyle('opacity, z-index');
 			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
 		},
-		animateSlides: function(activeNdx, newNdx){
+		animateSlides: function(activeNdx, newNdx, direction){
 			var self = this;
 			
 			if(self.changing || activeNdx == newNdx){
 				return false;
 			};
 			self.changing = true;
+			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
 			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
 				self.onChangeStart.call(this, self.$slides.eq(self.newSlide));
 			};
 			
-			self[self.effect+'Slides'](activeNdx, newNdx);
+			self[self.effect+'Slides'](activeNdx, newNdx, direction);
 		},
 		fadeSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
 			self.$slides.eq(activeNdx).css('z-index', 2);
 			self.$slides.eq(newNdx).css('z-index', 3);
 			if(!self.prefix){
@@ -155,7 +157,7 @@ function EasyFader(){
 			} else {
 				self.newSlide = target;
 			};
-			self.animateSlides(self.activeSlide, self.newSlide);
+			self.animateSlides(self.activeSlide, self.newSlide, target);
 		},
 		waitForNext: function(){
 			var self = this;
@@ -164,6 +166,16 @@ function EasyFader(){
 			self.slideTimer = setTimeout(function(){
 				self.changeSlides('next');
 			},self.slideDur);
+		},
+		getPrefixedCSS: function(property, value, prefixValue){
+			var self = this,
+				styles = {};
+			
+			for(i = 0; i < 2; i++){
+				var prefix = i == 0 ? self.prefix : '';
+				prefixValue ? styles[prefix+property] = prefix+value : styles[prefix+property] = value;
+			};
+			return styles;
 		}
 	};
 	
