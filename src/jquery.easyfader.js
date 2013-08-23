@@ -7,10 +7,9 @@
 * Author: Patrick Kunka
 * Copyright 2013 Patrick Kunka, All Rights Reserved
 */
-
-var EasyFader;
 	
 (function($){
+	
 	$.fn.removeStyle = function(style){
 		return this.each(function(){
 			var $obj = $(this);
@@ -51,6 +50,7 @@ var EasyFader;
 		this.changing = false,
 		this.effect = 'fade',
 		this.firstLoad = true,
+		this.autoCycle = true,
 		this.slideTimer = null,
 		this.activeSlide = null,
 		this.newSlide = null,
@@ -78,10 +78,16 @@ var EasyFader;
 				self.$pagerList
 					.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
 			};
+			if(typeof self[self.effect+'Init'] !== 'undefined'){
+				self[self.effect+'Init']();
+			};
+			if(typeof self.activeSlide !== 'undefined'){
+				self.activeSlide = 0;
+			};
 			self.bindHandlers();
 			self.$pagers = self.$pagerList.find('.pager');
-			self.$pagers.eq(0).addClass('active');
-			self.fadeSlides(1, 0);
+			self.$pagers.eq(self.activeSlide).addClass('active');
+			self.fadeSlides(self.activeSlide+1, 0);
 		},
 		bindHandlers: function(){
 			var self = this;
@@ -91,12 +97,12 @@ var EasyFader;
 				self.changeSlides(target);
 			});
 			$(window).on('keydown', function(e){
-					var key = e.keyCode;
-					if(key == 39 || key == 37){
-						var dir = key == 39 ? 'next' : 'prev';
-						clearTimeout(self.slideTimer);
-						self.changeSlides(dir);
-					}
+				var key = e.keyCode;
+				if(key == 39 || key == 37){
+					var dir = key == 39 ? 'next' : 'prev';
+					clearTimeout(self.slideTimer);
+					self.changeSlides(dir);
+				};
 			});
 		},
 		cleanUp: function(activeNdx, newNdx){
@@ -108,9 +114,12 @@ var EasyFader;
 			};
 			self.activeSlide = newNdx;
 			self.changing = false;
-			self.waitForNext();
 			if(typeof self.onChangeEnd == 'function'){
 				self.onChangeEnd.call(this, self.$slides.eq(self.activeSlide));
+			};
+			self.firstLoad = false;
+			if(self.autoCycle){
+				self.waitForNext();
 			};
 		},
 		fadeCleanUp: function(activeNdx, newNdx){
@@ -173,8 +182,6 @@ var EasyFader;
 		},
 		waitForNext: function(){
 			var self = this;
-			
-			self.firstLoad = false;
 			self.slideTimer = setTimeout(function(){
 				self.changeSlides('next');
 			},self.slideDur);
