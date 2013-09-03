@@ -74,9 +74,11 @@
 			self.totalSlides = self.$slides.length;
 			self.$pagerList = self.$container.find('.pager_list');
 			self.prefix = $.support.leadingWhitespace ? prefix(self.$container[0]) : false;
-			for(var i = 0; i < self.totalSlides; i++){
-				self.$pagerList
-					.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+			if(self.totalSlides > 1){
+				for(var i = 0; i < self.totalSlides; i++){
+					self.$pagerList
+						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+				};
 			};
 			if(typeof self[self.effect+'Init'] !== 'undefined'){
 				self[self.effect+'Init']();
