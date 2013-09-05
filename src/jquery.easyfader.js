@@ -1,30 +1,31 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.5
+* Version: 1.7
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
 * Author: Patrick Kunka
 * Copyright 2013 Patrick Kunka, All Rights Reserved
 */
-
+	
 (function($){
+	
 	$.fn.removeStyle = function(style){
 		return this.each(function(){
-			var obj = $(this);
+			var $obj = $(this);
 			style = style.replace(/\s+/g, '');
 			var styles = style.split(',');
 			$.each(styles,function(){
 				var search = new RegExp(this.toString() + '[^;]+;?', 'g');
-				obj.attr('style', function(i, style){
+				$obj.attr('style', function(i, style){
 					if(style) return style.replace(search, '');
 			    });
 			});
-			if(typeof obj.attr('style') !== 'undefined'){
-				var cleanStyle = obj.attr('style').replace(/\s{2,}/g, ' ').trim();
-				obj.attr('style', cleanStyle);
+			if(typeof $obj.attr('style') !== 'undefined'){
+				var cleanStyle = $obj.attr('style').replace(/\s{2,}/g, ' ').trim();
+				$obj.attr('style', cleanStyle);
 				if(cleanStyle == ''){
-					obj.removeAttr('style');
+					$obj.removeAttr('style');
 				};
 			}
 		});
@@ -39,15 +40,19 @@
 		}; 
 		return "transition" in el.style ? "" : false;
 	};
-
-	function EasyFader(){
+	
+	EasyFader = function(){
 		this.slideDur = 7000,
-		this.fadeDur = 800,
-		this.onFadeStart = null,
-		this.onFadeEnd = null,
+		this.effectDur = 800,
+		this.onChangeStart = null,
+		this.onChangeEnd = null,
 		this.slideSelector = '.slide',
-		this.fading = false,
+		this.changing = false,
+		this.effect = 'fade',
+		this.pagerListClass = 'pager-list',
+		this.fadeOnLoad = true,
 		this.firstLoad = true,
+		this.autoCycle = true,
 		this.slideTimer = null,
 		this.activeSlide = null,
 		this.newSlide = null,
@@ -69,59 +74,102 @@
 			
 			self.$slides = self.$container.find(self.slideSelector);
 			self.totalSlides = self.$slides.length;
-			self.$pagerList = self.$container.find('.pager_list');
+			self.$pagerList = self.$container.find('.'+self.pagerListClass);
 			self.prefix = $.support.leadingWhitespace ? prefix(self.$container[0]) : false;
-			for(var i = 0; i < self.totalSlides; i++){
-				self.$pagerList
-					.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+			if(self.totalSlides > 1){
+				for(var i = 0; i < self.totalSlides; i++){
+					self.$pagerList
+						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+				};
+			} else {
+				return false;
 			};
+			if(typeof self[self.effect+'Init'] !== 'undefined'){
+				self[self.effect+'Init']();
+			};
+			if(typeof self.activeSlide === 'undefined'){
+				self.activeSlide = 0;
+			};
+			self.bindHandlers();
+			self.$pagers = self.$pagerList.find('.pager');
+			self.$pagers.eq(self.activeSlide).addClass('active');
+			if(self.fadeOnLoad){
+				self.fadeSlides(self.activeSlide+1, 0);
+			} else if(self.autoCycle){
+				self.waitForNext();
+			};
+		},
+		bindHandlers: function(){
+			var self = this;
 			self.$container.find('.pager').on('click',function(){
 				var target = $(this).attr('data-target');
 				clearTimeout(self.slideTimer);
 				self.changeSlides(target);
 			});
-			self.$pagers = self.$pagerList.find('.pager');
-			self.$pagers.eq(0).addClass('active');
-			self.animateSlides(1, 0);
+			$(window).on('keydown', function(e){
+				var key = e.keyCode;
+				if(key == 39 || key == 37){
+					var dir = key == 39 ? 'next' : 'prev';
+					clearTimeout(self.slideTimer);
+					self.changeSlides(dir);
+				};
+			});
 		},
 		cleanUp: function(activeNdx, newNdx){
+			var self = this;
+			if(self.firstLoad && self.fadeOnLoad){
+				self.fadeCleanUp(activeNdx, newNdx);
+			} else {
+				self[self.effect+'CleanUp'](activeNdx, newNdx);
+			};
+			self.activeSlide = newNdx;
+			self.changing = false;
+			if(typeof self.onChangeEnd == 'function'){
+				self.onChangeEnd.call(this, self.$slides.eq(self.activeSlide));
+			};
+			self.firstLoad = false;
+			if(self.autoCycle){
+				self.waitForNext();
+			};
+		},
+		fadeCleanUp: function(activeNdx, newNdx){
 			var self = this;
 			
 			self.$slides.eq(activeNdx).removeStyle('opacity, z-index');
 			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
-			self.activeSlide = newNdx;
-			self.fading = false;
-			self.waitForNext();
-			if(typeof self.onFadeEnd == 'function'){
-				self.onFadeEnd.call(this, self.$slides.eq(self.activeSlide));
-			};
 		},
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			if(self.fading || activeNdx == newNdx){
+			if(self.changing || activeNdx == newNdx){
 				return false;
 			};
-			self.fading = true;
-			if(typeof self.onFadeStart == 'function' && !self.firstLoad){
-				self.onFadeStart.call(this, self.$slides.eq(self.newSlide));
-			};
+			self.changing = true;
 			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
+			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
+				self.onChangeStart.call(this, self.$slides.eq(self.newSlide));
+			};
+			
+			self[self.effect+'Slides'](activeNdx, newNdx);
+		},
+		fadeSlides: function(activeNdx, newNdx){
+			var self = this;
+			
 			self.$slides.eq(activeNdx).css('z-index', 2);
 			self.$slides.eq(newNdx).css('z-index', 3);
 			if(!self.prefix){
-				self.$slides.eq(newNdx).animate({'opacity': 1}, self.fadeDur,
+				self.$slides.eq(newNdx).animate({'opacity': 1}, self.effectDur,
 				function(){
 					self.cleanUp(activeNdx, newNdx);
 				});
 			} else {
 				var styles = {};
-				styles[self.prefix+'transition'] = 'opacity '+self.fadeDur+'ms';
+				styles[self.prefix+'transition'] = 'opacity '+self.effectDur+'ms';
 				styles['opacity'] = 1;
 				self.$slides.eq(newNdx).css(styles);
 				var fadeTimer = setTimeout(function(){
 					self.cleanUp(activeNdx, newNdx);
-				},self.fadeDur);
+				},self.effectDur);
 			};
 		},
 		changeSlides: function(target){
@@ -144,11 +192,19 @@
 		},
 		waitForNext: function(){
 			var self = this;
-			
-			self.firstLoad = false;
 			self.slideTimer = setTimeout(function(){
 				self.changeSlides('next');
 			},self.slideDur);
+		},
+		getPrefixedCSS: function(property, value, prefixValue){
+			var self = this,
+				styles = {};
+			
+			for(i = 0; i < 2; i++){
+				var prefix = i == 0 ? self.prefix : '';
+				prefixValue ? styles[prefix+property] = prefix+value : styles[prefix+property] = value;
+			};
+			return styles;
 		}
 	};
 	

@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="demo.css" type="text/css"/>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="src/jquery.easyfader.js"></script>
+		<script src="src/jquery.easyfader.slide.js"></script>
+		<script src="src/jquery.easyfader.carousel.js"></script>
+		<script>
+			$(function(){
+				$('#Fader').easyFader({
+					effect: 'carousel',
+					autoCycle: false
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div id="Fader" class="carousel">
+			<div class="wrapper">
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-pingpong2-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bookcase-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bikerack-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-kitchen-800x500.jpg"/>
+			</div>
+		    <div class="fader_controls">
+				<div class="pager prev" data-target="prev">&lsaquo;</div>
+				<div class="pager next" data-target="next">&rsaquo;</div>
+		 		<ul class="pager-list"></ul>
+		    </div>
+		</div>
+	</body>
+</html>
