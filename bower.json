@@ -1,6 +1,6 @@
 {
   "name": "easyfader",
-  "version": "1.8",
+  "version": "1.9",
   "main": "jquery.easyfader.min.js",
   "dependencies": {
     "jquery": ">=1.7"

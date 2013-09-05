@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.7
+* Version: 1.9
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -22,7 +22,7 @@
 			    });
 			});
 			if(typeof $obj.attr('style') !== 'undefined'){
-				var cleanStyle = $obj.attr('style').replace(/\s{2,}/g, ' ').trim();
+				var cleanStyle = $.trim($obj.attr('style').replace(/\s{2,}/g, ' '));
 				$obj.attr('style', cleanStyle);
 				if(cleanStyle == ''){
 					$obj.removeAttr('style');
