@@ -11,6 +11,7 @@
 (function($){
 	if(typeof EasyFader === 'function'){		
 		$.extend(EasyFader.prototype,{
+			includeMargin: false,
 			carouselInit: function(){
 				var self = this;
 				
@@ -31,7 +32,7 @@
 					self.travel = 1;
 				};
 				
-				var slideWidth = self.$slides.eq(0).outerWidth(),
+				var slideWidth = self.$slides.eq(0).outerWidth(self.includeMargin),
 					distance = self.travel * slideWidth;
 				
 				if(!self.prefix){
