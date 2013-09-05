@@ -49,6 +49,8 @@
 		this.slideSelector = '.slide',
 		this.changing = false,
 		this.effect = 'fade',
+		this.pagerListClass = 'pager-list',
+		this.fadeOnLoad = true,
 		this.firstLoad = true,
 		this.autoCycle = true,
 		this.slideTimer = null,
@@ -72,22 +74,30 @@
 			
 			self.$slides = self.$container.find(self.slideSelector);
 			self.totalSlides = self.$slides.length;
-			self.$pagerList = self.$container.find('.pager_list');
+			self.$pagerList = self.$container.find('.'+self.pagerListClass);
 			self.prefix = $.support.leadingWhitespace ? prefix(self.$container[0]) : false;
-			for(var i = 0; i < self.totalSlides; i++){
-				self.$pagerList
-					.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+			if(self.totalSlides > 1){
+				for(var i = 0; i < self.totalSlides; i++){
+					self.$pagerList
+						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+				};
+			} else {
+				return false;
 			};
 			if(typeof self[self.effect+'Init'] !== 'undefined'){
 				self[self.effect+'Init']();
 			};
-			if(typeof self.activeSlide !== 'undefined'){
+			if(typeof self.activeSlide === 'undefined'){
 				self.activeSlide = 0;
 			};
 			self.bindHandlers();
 			self.$pagers = self.$pagerList.find('.pager');
 			self.$pagers.eq(self.activeSlide).addClass('active');
-			self.fadeSlides(self.activeSlide+1, 0);
+			if(self.fadeOnLoad){
+				self.fadeSlides(self.activeSlide+1, 0);
+			} else if(self.autoCycle){
+				self.waitForNext();
+			};
 		},
 		bindHandlers: function(){
 			var self = this;
@@ -107,7 +117,7 @@
 		},
 		cleanUp: function(activeNdx, newNdx){
 			var self = this;
-			if(self.firstLoad){
+			if(self.firstLoad && self.fadeOnLoad){
 				self.fadeCleanUp(activeNdx, newNdx);
 			} else {
 				self[self.effect+'CleanUp'](activeNdx, newNdx);

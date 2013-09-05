@@ -1,3 +1,49 @@
+/* --- RESET --- */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section{
+	display: block;
+}
+
+table{
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+
+h1,h2,h3,h4,h5,h6{
+	font-weight: normal;
+}
+
+a{
+	text-decoration: none;
+}
+
+nav li{
+	list-style-type: none;
+	display: inline-block;
+}
+
+
 body{
   font-family: "futura", arial;
 }
@@ -21,8 +67,8 @@ body{
     height: auto;
 }
 
-.fader .prev,
-.fader .next{
+.prev,
+.next{
   position: absolute;
   height: 80px;
   line-height: 55px;
@@ -39,27 +85,28 @@ body{
   transition: all 150ms;
 }
 
-.fader .prev:hover,
-.fader .next:hover{
+.prev:hover,
+.next:hover{
   opacity: 1;
 }
 
-.fader .next{
+.next{
   left: auto;
   right: 0;
 }
 
-.fader .pager_list{
-  position: absolute;
-  width: 100%;
-  height: 40px;
-  line-height: 40px;
-  bottom: 0;
-  text-align: center;
-  z-index: 4;
+.pager-list{
+	position: absolute;
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	bottom: 0;
+	text-align: center;
+	z-index: 4;
+	padding: 0;
 }
 
-.fader .pager_list li{
+.pager-list li{
   display: inline-block;
   width: 15px;
   height: 15px;
@@ -72,7 +119,31 @@ body{
   transition: all 150ms;
 }
 
-.fader .pager_list li:hover,
-.fader .pager_list li.active{
+.pager-list li:hover,
+.pager-list li.active{
   opacity: 1;
+}
+
+.carousel{
+	margin-top: 400px;
+	padding-top: 20%;
+	background: #000;
+	overflow: hidden;
+	position: relative;
+}
+
+.carousel .wrapper{
+	position: absolute;
+	top: 0;
+	width: 1000%;
+	left: 50%;
+	height: 100%;
+	margin-left: -500%;
+	text-align: center;
+	white-space: nowrap;
+	font-size: 0;
+}
+
+.carousel .slide{
+	height: inherit;
 }
