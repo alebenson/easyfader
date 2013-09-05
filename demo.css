@@ -126,7 +126,7 @@ body{
 
 .carousel{
 	margin-top: 400px;
-	padding-top: 20%;
+	padding-top: 200px;
 	background: #000;
 	overflow: hidden;
 	position: relative;
@@ -142,8 +142,11 @@ body{
 	text-align: center;
 	white-space: nowrap;
 	font-size: 0;
+	
+	-webkit-backface-visibility: hidden;
+	-webkit-transform-style: preserve-3d;
 }
 
 .carousel .slide{
-	height: inherit;
+	height: 200px;
 }
