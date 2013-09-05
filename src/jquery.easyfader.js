@@ -81,8 +81,8 @@
 					self.$pagerList
 						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
 				};
-			} else {
-				return false;
+				self.bindHandlers();
+				
 			};
 			if(typeof self[self.effect+'Init'] !== 'undefined'){
 				self[self.effect+'Init']();
@@ -90,12 +90,12 @@
 			if(typeof self.activeSlide === 'undefined'){
 				self.activeSlide = 0;
 			};
-			self.bindHandlers();
 			self.$pagers = self.$pagerList.find('.pager');
 			self.$pagers.eq(self.activeSlide).addClass('active');
+			
 			if(self.fadeOnLoad){
 				self.fadeSlides(self.activeSlide+1, 0);
-			} else if(self.autoCycle){
+			} else if(self.autoCycle && self.totalSlides > 1){
 				self.waitForNext();
 			};
 		},
