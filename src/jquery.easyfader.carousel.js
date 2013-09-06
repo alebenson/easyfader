@@ -1,6 +1,6 @@
 /*
 * EASYFADER - "CAROUSEL" EXTENSION
-* Version: 1.0
+* Version: 1.0.1
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -33,16 +33,35 @@
 				};
 				
 				var slideWidth = self.$slides.eq(0).outerWidth(self.includeMargin),
-					distance = self.travel * slideWidth;
+					distance = -self.travel * slideWidth,
+					travel = -self.travel > 0 ? -self.travel : self.travel;
+					
+				if(-self.travel > 0){
+					for(i = 0; i<travel; i++){
+						var scrollWrapper = self.$scrollWrapper[0],
+							change = scrollWrapper.children[0],
+							filler = scrollWrapper.children[self.totalActual -1];
+
+						scrollWrapper.insertBefore(change, filler);
+					};
+				} else {
+					for(i = 0; i<travel; i++){
+						var scrollWrapper = self.$scrollWrapper[0],
+							change = scrollWrapper.children[self.totalActual -2],
+							first = scrollWrapper.children[0];
+
+						scrollWrapper.insertBefore(change, first);
+					};
+				};
 				
 				if(!self.prefix){
 					var leftPos = self.$scrollWrapper.css('left');
 						newLeftPos = (leftPos.slice(0, -2) * 1) + distance;
-				
+			
 					self.$scrollWrapper
-						.css('left',leftPos+'px')
+						.css('left',newLeftPos)
 						.animate({
-							left: newLeftPos+'px'
+							left: leftPos
 						},
 						self.effectDur, 
 						function(){
@@ -51,23 +70,32 @@
 				} else {
 					var transitionCSS = self.getPrefixedCSS('transition', 'transform '+self.effectDur+'ms ease-in-out' ,true),
 						transformCSS = self.getPrefixedCSS('transform', 'translateX('+distance+'px)');
+						
+					self.$scrollWrapper.css(transformCSS);
 				
-					self.$scrollWrapper
-						.css(transitionCSS)
-						.bind('webkitTransitionEnd transitionend',function(e){
-							if(e.originalEvent.propertyName == 'transform' || self.prefix+'transform'){
-								self.$scrollWrapper.unbind('webkitTransitionEnd transitionend');
-								self.cleanUp(activeNdx, newNdx);
-							};
-						});
+					
 					var delay = setTimeout(function(){
-						self.$scrollWrapper.css(transformCSS);
+					
+						self.$scrollWrapper
+							.css(transitionCSS)
+							.bind('webkitTransitionEnd transitionend',function(e){
+								if(e.originalEvent.propertyName == 'transform' || self.prefix+'transform'){
+									self.$scrollWrapper.unbind('webkitTransitionEnd transitionend');
+									self.cleanUp(activeNdx, newNdx);
+								};
+							});
+							
+						var unTransformCSS = self.getPrefixedCSS('transform', 'translateX(0)');
+						
+						self.$scrollWrapper.css(unTransformCSS);
+					
 					},10);
+					
 				};
 			},
 			carouselCleanUp: function(activeNdx, newNdx){
-				var	self = this,
-					travel = -self.travel > 0 ? -self.travel : self.travel;
+				var	self = this;
+					
 				
 				if(!self.prefix){
 					self.$scrollWrapper.removeStyle('left');
@@ -75,23 +103,7 @@
 					self.$scrollWrapper.removeStyle(self.prefix+'transition, transition, '+self.prefix+'transform, transform');
 				};
 				
-				if(-self.travel > 0){
-					for(i = 0; i<travel; i++){
-						var scrollWrapper = self.$scrollWrapper[0],
-							change = scrollWrapper.children[0],
-							filler = scrollWrapper.children[self.totalActual -1];
-							
-						scrollWrapper.insertBefore(change, filler);
-					};
-				} else {
-					for(i = 0; i<travel; i++){
-						var scrollWrapper = self.$scrollWrapper[0],
-							change = scrollWrapper.children[self.totalActual -2],
-							first = scrollWrapper.children[0];
-						
-						scrollWrapper.insertBefore(change, first);
-					};
-				};
+				
 				
 				
 			},
