@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.9
+* Version: 2.0
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -64,6 +64,7 @@
 	
 	EasyFader.prototype = {
 		constructor: EasyFader,
+		instances: {},
 		init: function(domNode, settings){
 			var self = this;
 			
@@ -205,13 +206,35 @@
 				prefixValue ? styles[prefix+property] = prefix+value : styles[prefix+property] = value;
 			};
 			return styles;
+		},
+		pause: function(){
+			var self = this;
+
+			clearTimeout(self.slideTimer);
+			self.autoCycle = false;
+		},
+		resume: function(){
+			var self = this;
+			
+			self.autoCycle = this;
+			self.waitForNext();
 		}
 	};
 	
-	$.fn.easyFader = function(settings){
+	function instantiate(domNode, settings){
+		var instance = new EasyFader();
+		instance.init(domNode, settings);
+		instance.instances[domNode.id] = instance;
+	};
+	
+	$.fn.easyFader = function(){
+		var args = arguments;
 		return this.each(function(){
-			var instance = new EasyFader();
-			instance.init(this, settings);
+			if(args && typeof args[0] === 'string'){
+				EasyFader.prototype.instances[this.id][args[0]](args[1]);
+			} else {
+				instantiate(this, args[0]);
+			};
 		});
 	};
 })(jQuery);
