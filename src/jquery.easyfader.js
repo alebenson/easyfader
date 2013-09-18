@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 2.0
+* Version: 2.0.1
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -105,14 +105,14 @@
 			self.$container.find('.pager').on('click',function(){
 				var target = $(this).attr('data-target');
 				clearTimeout(self.slideTimer);
-				self.changeSlides(target);
+				self.__changeSlides(target);
 			});
 			$(window).on('keydown', function(e){
 				var key = e.keyCode;
 				if(key == 39 || key == 37){
 					var dir = key == 39 ? 'next' : 'prev';
 					clearTimeout(self.slideTimer);
-					self.changeSlides(dir);
+					self.__changeSlides(dir);
 				};
 			});
 		},
@@ -173,7 +173,7 @@
 				},self.effectDur);
 			};
 		},
-		changeSlides: function(target){
+		__changeSlides: function(target){
 			var self = this;
 			
 			if(target == 'next'){
@@ -194,7 +194,7 @@
 		waitForNext: function(){
 			var self = this;
 			self.slideTimer = setTimeout(function(){
-				self.changeSlides('next');
+				self.__changeSlides('next');
 			},self.slideDur);
 		},
 		getPrefixedCSS: function(property, value, prefixValue){
@@ -218,6 +218,12 @@
 			
 			self.autoCycle = this;
 			self.waitForNext();
+		},
+		changeSlides: function(arg){
+			var self = this;
+			
+			clearTimeout(self.slideTimer);
+			self.__changeSlides(arg);
 		}
 	};
 	
