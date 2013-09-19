@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 2.0.1
+* Version: 2.0.2
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -105,14 +105,14 @@
 			self.$container.find('.pager').on('click',function(){
 				var target = $(this).attr('data-target');
 				clearTimeout(self.slideTimer);
-				self.__changeSlides(target);
+				self._changeSlides(target);
 			});
 			$(window).on('keydown', function(e){
 				var key = e.keyCode;
 				if(key == 39 || key == 37){
 					var dir = key == 39 ? 'next' : 'prev';
 					clearTimeout(self.slideTimer);
-					self.__changeSlides(dir);
+					self._changeSlides(dir);
 				};
 			});
 		},
@@ -173,16 +173,15 @@
 				},self.effectDur);
 			};
 		},
-		__changeSlides: function(target){
+		_changeSlides: function(target){
 			var self = this;
-			
 			if(target == 'next'){
-				self.newSlide = self.activeSlide + 1;
+				self.newSlide = (self.activeSlide * 1) + 1;
 				if(self.newSlide > self.totalSlides - 1){
 					self.newSlide = 0;
 				}
 			} else if(target == 'prev'){
-				self.newSlide = self.activeSlide - 1;
+				self.newSlide = (self.activeSlide * 1) - 1;
 				if(self.newSlide < 0){
 					self.newSlide = self.totalSlides - 1;
 				};
@@ -194,7 +193,7 @@
 		waitForNext: function(){
 			var self = this;
 			self.slideTimer = setTimeout(function(){
-				self.__changeSlides('next');
+				self._changeSlides('next');
 			},self.slideDur);
 		},
 		getPrefixedCSS: function(property, value, prefixValue){
@@ -223,7 +222,7 @@
 			var self = this;
 			
 			clearTimeout(self.slideTimer);
-			self.__changeSlides(arg);
+			self._changeSlides(arg);
 		}
 	};
 	
