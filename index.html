@@ -8,19 +8,18 @@
 		<script src="src/jquery.easyfader.carousel.js"></script>
 		<script>
 			$(function(){
-				$('#Fader').easyFader({
+				$('#Carousel').easyFader({
 					effect: 'carousel',
-					autoCycle: false
 				});
-				
-				$('#Fader2').easyFader({
-					effect: 'carousel'
+				$('#Fader').easyFader();
+				$('#Slider').easyFader({
+					effect: 'slide'
 				});
 			});
 		</script>
 	</head>
 	<body>
-		<div id="Fader" class="carousel">
+		<div id="Fader" class="fader">
 			<div class="wrapper">
 				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-pingpong2-800x500.jpg"/>
 				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bookcase-800x500.jpg"/>
@@ -34,7 +33,21 @@
 		    </div>
 		</div>
 		
-		<div id="Fader2" class="carousel">
+		<div id="Carousel" class="carousel">
+			<div class="wrapper">
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-pingpong2-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bookcase-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bikerack-800x500.jpg"/>
+				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-kitchen-800x500.jpg"/>
+			</div>
+		    <div class="fader_controls">
+				<div class="pager prev" data-target="prev">&lsaquo;</div>
+				<div class="pager next" data-target="next">&rsaquo;</div>
+		 		<ul class="pager-list"></ul>
+		    </div>
+		</div>
+		
+		<div id="Slider" class="fader">
 			<div class="wrapper">
 				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-pingpong2-800x500.jpg"/>
 				<img class="slide" src="http://www.barrelny.com/wp-content/uploads/about-office-slide-bookcase-800x500.jpg"/>
