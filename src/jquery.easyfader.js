@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 1.9
+* Version: 2.0.3
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -54,7 +54,7 @@
 		this.firstLoad = true,
 		this.autoCycle = true,
 		this.slideTimer = null,
-		this.activeSlide = null,
+		this.activeIndex = null,
 		this.newSlide = null,
 		this.$slides = null,
 		this.totalSlides = null,
@@ -64,6 +64,7 @@
 	
 	EasyFader.prototype = {
 		constructor: EasyFader,
+		instances: {},
 		init: function(domNode, settings){
 			var self = this;
 			
@@ -87,16 +88,28 @@
 			if(typeof self[self.effect+'Init'] !== 'undefined'){
 				self[self.effect+'Init']();
 			};
-			if(typeof self.activeSlide === 'undefined'){
-				self.activeSlide = 0;
+			if(!self.activeIndex){
+				self.activeIndex = 0;
 			};
+			self.updateInfo();
 			self.$pagers = self.$pagerList.find('.pager');
-			self.$pagers.eq(self.activeSlide).addClass('active');
+			self.$pagers.eq(self.activeIndex).addClass('active');
 			
 			if(self.fadeOnLoad){
-				self.fadeSlides(self.activeSlide+1, 0);
+				self.fadeSlides(self.activeIndex+1, 0);
 			} else if(self.autoCycle && self.totalSlides > 1){
 				self.waitForNext();
+			};	
+		},
+		updateInfo: function(){
+			var self = this;
+			
+			self.info = {
+				$container: self.$container,
+				effect: self.effect,
+				activeIndex: self.activeIndex,
+				$activeSlide: self.$slides.eq(self.activeIndex),
+				totalSlides: self.$slides.length
 			};
 		},
 		bindHandlers: function(){
@@ -104,14 +117,14 @@
 			self.$container.find('.pager').on('click',function(){
 				var target = $(this).attr('data-target');
 				clearTimeout(self.slideTimer);
-				self.changeSlides(target);
+				self._changeSlides(target);
 			});
 			$(window).on('keydown', function(e){
 				var key = e.keyCode;
 				if(key == 39 || key == 37){
 					var dir = key == 39 ? 'next' : 'prev';
 					clearTimeout(self.slideTimer);
-					self.changeSlides(dir);
+					self._changeSlides(dir);
 				};
 			});
 		},
@@ -122,10 +135,15 @@
 			} else {
 				self[self.effect+'CleanUp'](activeNdx, newNdx);
 			};
-			self.activeSlide = newNdx;
+			self.activeIndex = newNdx;
 			self.changing = false;
+			self.updateInfo();
+			if(typeof self.callback == 'function'){
+				self.callback.call(this, self.info);
+				delete self.callback;
+			};
 			if(typeof self.onChangeEnd == 'function'){
-				self.onChangeEnd.call(this, self.$slides.eq(self.activeSlide));
+				self.onChangeEnd.call(this, self.info);
 			};
 			self.firstLoad = false;
 			if(self.autoCycle){
@@ -147,7 +165,7 @@
 			self.changing = true;
 			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
 			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
-				self.onChangeStart.call(this, self.$slides.eq(self.newSlide));
+				self.onChangeStart.call(this, self.info);
 			};
 			
 			self[self.effect+'Slides'](activeNdx, newNdx);
@@ -172,28 +190,27 @@
 				},self.effectDur);
 			};
 		},
-		changeSlides: function(target){
+		_changeSlides: function(target){
 			var self = this;
-			
 			if(target == 'next'){
-				self.newSlide = self.activeSlide + 1;
+				self.newSlide = (self.activeIndex * 1) + 1;
 				if(self.newSlide > self.totalSlides - 1){
 					self.newSlide = 0;
 				}
 			} else if(target == 'prev'){
-				self.newSlide = self.activeSlide - 1;
+				self.newSlide = (self.activeIndex * 1) - 1;
 				if(self.newSlide < 0){
 					self.newSlide = self.totalSlides - 1;
 				};
 			} else {
 				self.newSlide = target;
 			};
-			self.animateSlides(self.activeSlide, self.newSlide);
+			self.animateSlides(self.activeIndex, self.newSlide);
 		},
 		waitForNext: function(){
 			var self = this;
 			self.slideTimer = setTimeout(function(){
-				self.changeSlides('next');
+				self._changeSlides('next');
 			},self.slideDur);
 		},
 		getPrefixedCSS: function(property, value, prefixValue){
@@ -205,13 +222,71 @@
 				prefixValue ? styles[prefix+property] = prefix+value : styles[prefix+property] = value;
 			};
 			return styles;
+		},
+	
+		pause: function(){
+			var self = this;
+
+			clearTimeout(self.slideTimer);
+			self.autoCycle = false;
+		},
+		play: function(wait){
+			var self = this;
+		
+			self.autoCycle = true;
+			if(wait){
+				self.waitForNext();
+			} else {
+				self._changeSlides('next');	
+			};
+		},
+		changeSlides: function(dir, callback){
+			var self = this;
+				self.callback = callback;
+				
+			dir = dir ? dir : 'next';
+		
+			clearTimeout(self.slideTimer);
+			self._changeSlides(dir);	
+		},
+		getOption: function(option){
+			var self = this;
+			
+			return self[option];
+		},
+		setOptions: function(options){
+			var self = this;
+			
+			$.extend(self, options);
 		}
 	};
 	
-	$.fn.easyFader = function(settings){
-		return this.each(function(){
-			var instance = new EasyFader();
-			instance.init(this, settings);
+	$.fn.easyFader = function(){
+		var args = arguments,
+			rand = function(){
+				return ('00000'+(Math.random()*16777216<<0).toString(16)).substr(-6).toUpperCase();
+			},
+			dataReturn = [],
+			eachReturn;
+			
+		eachReturn = this.each(function(){
+			if(args && typeof args[0] === 'string'){
+				var data = EasyFader.prototype.instances[this.id][args[0]](args[1], args[2]);
+				if(data)dataReturn.push(data);
+			} else {
+				this.id = !this.id ? 'EasyFader'+rand() : this.id;
+				var instance = new EasyFader();
+				if(!instance.instances[this.id]){
+					instance.instances[this.id] = instance;
+					instance.init(this, args[0]);
+				};
+			};
 		});
+		
+		if(dataReturn.length){
+			return dataReturn.length > 1 ? dataReturn : dataReturn[0];
+		} else {
+			return eachReturn;
+		};
 	};
 })(jQuery);
