@@ -57,7 +57,7 @@
 						
 						setTimeout(function(){
 							animate();
-						},10);
+						},20);
 					};
 					
 					function animate(){
@@ -74,7 +74,7 @@
 						
 					setTimeout(function(){
 						applyTransitions();
-					},10);
+					},20);
 				};
 			},
 			slideCleanUp: function(activeNdx, newNdx){
