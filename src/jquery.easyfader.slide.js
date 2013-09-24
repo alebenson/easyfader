@@ -1,6 +1,6 @@
 /*
 * EASYFADER - "SLIDE" EXTENSION
-* Version: 1.0
+* Version: 1.0.1
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -45,15 +45,19 @@
 				} else {
 					function applyTransitions(){
 						var done = false;
+						
 						$actors
-							.css(self.getPrefixedCSS('transition', 'transform '+self.effectDur+' ease-in-out' ,true))
+							.css(self.getPrefixedCSS('transition', 'transform '+self.effectDur+'ms ease-in-out' ,true))
 							.bind('webkitTransitionEnd transitionend',function(e){
 								if((e.originalEvent.propertyName == 'transform' || self.prefix+'transform') && !done){
 									done = true;
 									self.cleanUp(activeNdx, newNdx);
 								};
 							});
-						requestAnimationFrame(animate);
+						
+						setTimeout(function(){
+							animate();
+						},10);
 					};
 					
 					function animate(){
@@ -68,7 +72,9 @@
 						})
 						.css(self.getPrefixedCSS('transform','translate3d('+newX+',0,0)'));
 						
-					requestAnimationFrame(applyTransitions);
+					setTimeout(function(){
+						applyTransitions();
+					},10);
 				};
 			},
 			slideCleanUp: function(activeNdx, newNdx){
