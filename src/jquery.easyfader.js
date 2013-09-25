@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 2.0.3
+* Version: 2.0.4
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -114,20 +114,30 @@
 		},
 		bindHandlers: function(){
 			var self = this;
-			self.$container.find('.pager').on('click',function(){
-				var target = $(this).attr('data-target');
-				clearTimeout(self.slideTimer);
-				self._changeSlides(target);
-			});
-			$(window).on('keydown', function(e){
-				var key = e.keyCode;
-				if(key == 39 || key == 37){
-					var dir = key == 39 ? 'next' : 'prev';
-					clearTimeout(self.slideTimer);
-					self._changeSlides(dir);
-				};
-			});
+			
+			for(key in self.handlers){
+				self.handlers[key].apply(self);
+			};
 		},
+		handlers: {
+			default: function(){
+				var self = this;
+				self.$container.find('.pager').on('click',function(){
+					var target = $(this).attr('data-target');
+					clearTimeout(self.slideTimer);
+					self._changeSlides(target);
+				});
+				$(window).on('keydown', function(e){
+					var key = e.keyCode;
+					if(key == 39 || key == 37){
+						var dir = key == 39 ? 'next' : 'prev';
+						clearTimeout(self.slideTimer);
+						self._changeSlides(dir);
+					};
+				});
+			}
+		},
+		
 		cleanUp: function(activeNdx, newNdx){
 			var self = this;
 			if(self.firstLoad && self.fadeOnLoad){
@@ -151,9 +161,9 @@
 			};
 		},
 		fadeCleanUp: function(activeNdx, newNdx){
-			var self = this;
-			
-			self.$slides.eq(activeNdx).removeStyle('opacity, z-index');
+			var self = this,
+				$active = self.$slides.eq(activeNdx);
+			!$.support.opacity ? $active.removeAttr('style') : $active.removeStyle('opacity, z-index');
 			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
 		},
 		animateSlides: function(activeNdx, newNdx){
@@ -176,10 +186,13 @@
 			self.$slides.eq(activeNdx).css('z-index', 2);
 			self.$slides.eq(newNdx).css('z-index', 3);
 			if(!self.prefix){
-				self.$slides.eq(newNdx).animate({'opacity': 1}, self.effectDur,
-				function(){
-					self.cleanUp(activeNdx, newNdx);
-				});
+				self.$slides.eq(newNdx).animate(
+					{'opacity': 1}, 
+					self.effectDur,
+					function(){
+						self.cleanUp(activeNdx, newNdx);
+					}
+				);
 			} else {
 				var styles = {};
 				styles[self.prefix+'transition'] = 'opacity '+self.effectDur+'ms';
