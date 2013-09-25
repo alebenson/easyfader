@@ -169,7 +169,7 @@
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			if(self.changing || activeNdx == newNdx){
+			if(self.changing){
 				return false;
 			};
 			self.changing = true;
@@ -241,16 +241,13 @@
 			var self = this;
 
 			clearTimeout(self.slideTimer);
-			self.autoCycle = false;
+			//self.autoCycle = false;
 		},
 		play: function(wait){
 			var self = this;
-		
-			self.autoCycle = true;
-			if(wait){
-				self.waitForNext();
-			} else {
-				self._changeSlides('next');	
+
+			if(self.autoCycle){
+				wait ? self.waitForNext() : self._changeSlides('next');	
 			};
 		},
 		changeSlides: function(dir, callback){

@@ -34,21 +34,22 @@
 				
 				var slideWidth = self.$slides.eq(0).outerWidth(self.includeMargin),
 					distance = -self.travel * slideWidth,
-					travel = -self.travel > 0 ? -self.travel : self.travel;
+					travel = -self.travel > 0 ? -self.travel : self.travel,
+					scrollWrapper = self.$scrollWrapper[0],
+					change,
+					filler;
 					
 				if(-self.travel > 0){
 					for(i = 0; i<travel; i++){
-						var scrollWrapper = self.$scrollWrapper[0],
-							change = scrollWrapper.children[0],
-							filler = scrollWrapper.children[self.totalActual -1];
+						change = scrollWrapper.children[0],
+						filler = scrollWrapper.children[self.totalActual -1];
 
 						scrollWrapper.insertBefore(change, filler);
 					};
 				} else {
 					for(i = 0; i<travel; i++){
-						var scrollWrapper = self.$scrollWrapper[0],
-							change = scrollWrapper.children[self.totalActual -2],
-							first = scrollWrapper.children[0];
+						change = scrollWrapper.children[self.totalActual -2],
+						first = scrollWrapper.children[0];
 
 						scrollWrapper.insertBefore(change, first);
 					};
@@ -69,7 +70,8 @@
 						});
 				} else {
 					var transitionCSS = self.getPrefixedCSS('transition', 'transform '+self.effectDur+'ms ease-in-out' ,true),
-						transformCSS = self.getPrefixedCSS('transform', 'translateX('+distance+'px)');
+						transformCSS = 	self.preOffset ? self.getPrefixedCSS('transform', 'translateX('+self.preOffset+'px)') : 
+										self.getPrefixedCSS('transform', 'translateX('+distance+'px)');
 						
 					self.$scrollWrapper.css(transformCSS);
 				
@@ -100,6 +102,7 @@
 				if(!self.prefix){
 					self.$scrollWrapper.removeStyle('left');
 				} else {
+					delete self.preOffset;
 					self.$scrollWrapper.removeStyle(self.prefix+'transition, transition, '+self.prefix+'transform, transform');
 				};
 				
