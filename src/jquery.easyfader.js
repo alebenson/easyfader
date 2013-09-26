@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 2.0.4
+* Version: 2.0.5
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -169,7 +169,7 @@
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			if(self.changing || activeNdx == newNdx){
+			if(self.changing){
 				return false;
 			};
 			self.changing = true;
@@ -205,6 +205,7 @@
 		},
 		_changeSlides: function(target){
 			var self = this;
+			
 			if(target == 'next'){
 				self.newSlide = (self.activeIndex * 1) + 1;
 				if(self.newSlide > self.totalSlides - 1){
@@ -218,6 +219,7 @@
 			} else {
 				self.newSlide = target;
 			};
+			
 			self.animateSlides(self.activeIndex, self.newSlide);
 		},
 		waitForNext: function(){
@@ -241,23 +243,20 @@
 			var self = this;
 
 			clearTimeout(self.slideTimer);
-			self.autoCycle = false;
+			//self.autoCycle = false;
 		},
 		play: function(wait){
 			var self = this;
-		
-			self.autoCycle = true;
-			if(wait){
-				self.waitForNext();
-			} else {
-				self._changeSlides('next');	
+
+			if(self.autoCycle){
+				wait ? self.waitForNext() : self._changeSlides('next');	
 			};
 		},
 		changeSlides: function(dir, callback){
 			var self = this;
 				self.callback = callback;
 				
-			dir = dir ? dir : 'next';
+			dir = typeof dir !== 'undefined' ? dir : 'next';
 		
 			clearTimeout(self.slideTimer);
 			self._changeSlides(dir);	

@@ -2,6 +2,7 @@
 	<head>
 		<link rel="stylesheet" href="demo.css" type="text/css"/>
 		
+		<script src="src/fastclick.js"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="src/jquery.easyfader.js"></script>
 		<script src="src/jquery.easyfader.slide.js"></script>
@@ -9,12 +10,18 @@
 		<script src="src/jquery.easyfader.swipe.js"></script>
 		<script>
 			$(function(){
+				FastClick.attach(document.body);
+				
 				$('#Carousel').easyFader({
 					effect: 'carousel',
+					effectDur: 400
 				});
-				$('#Fader').easyFader();
+				$('#Fader').easyFader({
+					autoCycle: false,
+				});
 				$('#Slider').easyFader({
-					effect: 'slide'
+					effect: 'slide',
+					autoCycle: false
 				});
 			});
 		</script>

@@ -2,7 +2,7 @@
     "name": "easyfader",
     "title": "EasyFader",
     "description": "An ultralight fading slideshow plugin for responsive layouts",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "author": {
         "name": "Patrick Kunka"
     },
