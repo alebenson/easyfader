@@ -1,6 +1,6 @@
 /*
 * EASYFADER - "SWIPE" EXTENSION
-* Version: 1.1
+* Version: 1.0.1
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -50,12 +50,13 @@
 							endY = newE.pageY;
 							firstE = false;
 							vectorY = endY - startY > 0 ? -(endY - startY) : endY - startY;
-							angle = vectorY/vectorX;
-							if(angle < 1){
+							angle = (vectorY/vectorX).toFixed(1) * 1;
+							console.info(angle)
+							if(angle < 3 && angle !== Number.NEGATIVE_INFINITY){
 								e.preventDefault();
 								swipeX = true;
 							};
-						} else if(self.effect == 'carousel'){
+						} else if(self.effect == 'carousel' && swipeX){
 							var transformCSS = self.getPrefixedCSS('transform', 'translateX('+distanceX+'px)');
 							self.$scrollWrapper.css(transformCSS);
 						};
@@ -71,17 +72,18 @@
 						
 						if(self.effect == 'carousel'){
 							var slideWidth = self.$slides.eq(0).outerWidth(self.includeMargin),
-								slidesSwiped = -Math.round(distanceX / slideWidth);
-								slidesSwiped = slidesSwiped ? slidesSwiped : (distanceX < 0 ? 1 : -1);
+								slidesSwiped = -(distanceX / slideWidth),
+								slidesSwiped = slidesSwiped < 0 ? Math.floor(slidesSwiped) : Math.ceil(slidesSwiped);
 								
 							self.preOffset = (slideWidth * slidesSwiped) + distanceX;
 								
-							target = self.activeIndex + slidesSwiped;
+							target = (self.activeIndex + slidesSwiped) % self.totalSlides;
+							target = target < 0 ? self.totalSlides + target : target;
 						} else {
 							target = distanceX > 15 ? 'prev' : distanceX < -15 ? 'next' : false;
 						};
 					
-						if(target) self.changeSlides(target);
+						if(target !== false) self.changeSlides(target);
 					};
 					firstE = true;
 				});

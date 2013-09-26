@@ -97,8 +97,7 @@
 			},
 			carouselCleanUp: function(activeNdx, newNdx){
 				var	self = this;
-					
-				
+
 				if(!self.prefix){
 					self.$scrollWrapper.removeStyle('left');
 				} else {

@@ -205,6 +205,7 @@
 		},
 		_changeSlides: function(target){
 			var self = this;
+			
 			if(target == 'next'){
 				self.newSlide = (self.activeIndex * 1) + 1;
 				if(self.newSlide > self.totalSlides - 1){
@@ -218,6 +219,7 @@
 			} else {
 				self.newSlide = target;
 			};
+			
 			self.animateSlides(self.activeIndex, self.newSlide);
 		},
 		waitForNext: function(){
@@ -254,7 +256,7 @@
 			var self = this;
 				self.callback = callback;
 				
-			dir = dir ? dir : 'next';
+			dir = typeof dir !== 'undefined' ? dir : 'next';
 		
 			clearTimeout(self.slideTimer);
 			self._changeSlides(dir);	
