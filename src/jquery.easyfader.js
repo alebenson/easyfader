@@ -1,6 +1,6 @@
 /*
 * EASYFADER - An Ultralight Fading Slideshow For Responsive Layouts
-* Version: 2.0.5
+* Version: 2.0.7
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -10,26 +10,35 @@
 	
 (function($){
 	
-	$.fn.removeStyle = function(style){
+	$.fn.removeStyle = function(style, prefix, undf){
+		prefix = prefix ? prefix : '';
+
 		return this.each(function(){
-			var $obj = $(this);
-			style = style.replace(/\s+/g, '');
-			var styles = style.split(',');
-			$.each(styles,function(){
-				var search = new RegExp(this.toString() + '[^;]+;?', 'g');
-				$obj.attr('style', function(i, style){
-					if(style) return style.replace(search, '');
-			    });
-			});
-			if(typeof $obj.attr('style') !== 'undefined'){
-				var cleanStyle = $.trim($obj.attr('style').replace(/\s{2,}/g, ' '));
-				$obj.attr('style', cleanStyle);
-				if(cleanStyle == ''){
-					$obj.removeAttr('style');
+			var el = this,
+			styles = style.split(' ');
+
+			for(var i = 0; i < styles.length; i++){
+
+				for(var j = 0; j < 2; j++){
+					var prop = j ? styles[i] : prefix+styles[i];
+
+					if(
+						el.style[prop] !== undf && 
+						typeof el.style[prop] !== 'unknown' &&
+						el.style[prop].length > 0
+					){
+						el.style[prop] = '';
+					};
+
+					if(!prefix) break;
 				};
+			};
+
+			if(el.attributes.style !== undf && el.attributes.style.nodeValue === ''){
+				el.attributes.removeNamedItem('style');
 			}
 		});
-    };
+	};
 
 	function prefix(el){
 		var prefixes = ["Webkit", "Moz", "O", "ms"];
@@ -55,7 +64,7 @@
 		this.autoCycle = true,
 		this.slideTimer = null,
 		this.activeIndex = null,
-		this.newSlide = null,
+		this.newIndex = null,
 		this.$slides = null,
 		this.totalSlides = null,
 		this.$pagerList = null,
@@ -75,7 +84,7 @@
 			
 			self.$slides = self.$container.find(self.slideSelector);
 			self.totalSlides = self.$slides.length;
-			self.$pagerList = self.$container.find('.'+self.pagerListClass);
+			self.$pagerList = $('.'+self.pagerListClass);
 			self.prefix = $.support.leadingWhitespace ? prefix(self.$container[0]) : false;
 			if(self.totalSlides > 1){
 				for(var i = 0; i < self.totalSlides; i++){
@@ -96,6 +105,7 @@
 			self.$pagers.eq(self.activeIndex).addClass('active');
 			
 			if(self.fadeOnLoad){
+				self.changing = true;
 				self.fadeSlides(self.activeIndex+1, 0);
 			} else if(self.autoCycle && self.totalSlides > 1){
 				self.waitForNext();
@@ -109,7 +119,10 @@
 				effect: self.effect,
 				activeIndex: self.activeIndex,
 				$activeSlide: self.$slides.eq(self.activeIndex),
-				totalSlides: self.$slides.length
+				targetIndex: self.newNdx,
+				$targetSlide: self.$slides.eq(self.newNdx),
+				totalSlides: self.$slides.length,
+				object: self
 			};
 		},
 		bindHandlers: function(){
@@ -120,12 +133,16 @@
 			};
 		},
 		handlers: {
-			default: function(){
+			def: function(){
 				var self = this;
-				self.$container.find('.pager').on('click',function(){
-					var target = $(this).attr('data-target');
-					clearTimeout(self.slideTimer);
-					self._changeSlides(target);
+				self.$pagerList.find('.pager').on('click',function(){
+					var $pager = $(this),
+						target = $pager.attr('data-target');
+						
+					if(!$pager.hasClass('active')){
+						clearTimeout(self.slideTimer);
+						self._changeSlides(target);
+					};
 				});
 				$(window).on('keydown', function(e){
 					var key = e.keyCode;
@@ -163,17 +180,17 @@
 		fadeCleanUp: function(activeNdx, newNdx){
 			var self = this,
 				$active = self.$slides.eq(activeNdx);
-			!$.support.opacity ? $active.removeAttr('style') : $active.removeStyle('opacity, z-index');
-			self.$slides.eq(newNdx).removeStyle(self.prefix+'transition, transition');
+			!$.support.opacity ? $active.removeAttr('style') : $active.removeStyle('opacity z-index');
+			self.$slides.eq(newNdx).removeStyle('transition', self.prefix);
 		},
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
 			
-			if(self.changing){
+			if(self.changing || self.totalSlides == 1){
 				return false;
 			};
 			self.changing = true;
-			self.$pagers.removeClass('active').eq(self.newSlide).addClass('active');
+			self.$pagers.removeClass('active').eq(self.newNdx).addClass('active');
 			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
 				self.onChangeStart.call(this, self.info);
 			};
@@ -206,21 +223,26 @@
 		_changeSlides: function(target){
 			var self = this;
 			
-			if(target == 'next'){
-				self.newSlide = (self.activeIndex * 1) + 1;
-				if(self.newSlide > self.totalSlides - 1){
-					self.newSlide = 0;
-				}
-			} else if(target == 'prev'){
-				self.newSlide = (self.activeIndex * 1) - 1;
-				if(self.newSlide < 0){
-					self.newSlide = self.totalSlides - 1;
-				};
-			} else {
-				self.newSlide = target;
+			if(self.changing || self.totalSlides == 1){
+				return false;
 			};
 			
-			self.animateSlides(self.activeIndex, self.newSlide);
+			if(target == 'next'){
+				self.newNdx = (self.activeIndex * 1) + 1;
+				if(self.newNdx > self.totalSlides - 1){
+					self.newNdx = 0;
+				}
+			} else if(target == 'prev'){
+				self.newNdx = (self.activeIndex * 1) - 1;
+				if(self.newNdx < 0){
+					self.newNdx = self.totalSlides - 1;
+				};
+			} else {
+				self.newNdx = target;
+			};
+			self.updateInfo();
+			
+			self.animateSlides(self.activeIndex, self.newNdx);
 		},
 		waitForNext: function(){
 			var self = this;
@@ -243,14 +265,14 @@
 			var self = this;
 
 			clearTimeout(self.slideTimer);
-			//self.autoCycle = false;
+			self.autoCycle = false;
 		},
 		play: function(wait){
 			var self = this;
 
-			if(self.autoCycle){
-				wait ? self.waitForNext() : self._changeSlides('next');	
-			};
+			self.autoCycle = true;	
+				
+			wait ? self.waitForNext() : self._changeSlides('next');	
 		},
 		changeSlides: function(dir, callback){
 			var self = this;
@@ -265,6 +287,11 @@
 			var self = this;
 			
 			return self[option];
+		},
+		getInfo: function(){
+			var self = this;
+			
+			return self.info;
 		},
 		setOptions: function(options){
 			var self = this;

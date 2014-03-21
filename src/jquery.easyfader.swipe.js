@@ -1,6 +1,6 @@
 /*
 * EASYFADER - "SWIPE" EXTENSION
-* Version: 1.0.1
+* Version: 1.0.2
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -51,7 +51,6 @@
 							firstE = false;
 							vectorY = endY - startY > 0 ? -(endY - startY) : endY - startY;
 							angle = (vectorY/vectorX).toFixed(1) * 1;
-							console.info(angle)
 							if(angle < 3 && angle !== Number.NEGATIVE_INFINITY){
 								e.preventDefault();
 								swipeX = true;

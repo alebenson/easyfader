@@ -1,6 +1,6 @@
 /*
 * EASYFADER - "CAROUSEL" EXTENSION
-* Version: 1.0.3
+* Version: 1.0.4
 * License: Creative Commons Attribution 3.0 Unported - CC BY 3.0
 * http://creativecommons.org/licenses/by/3.0/
 * This software may be used freely on commercial and non-commercial projects with attribution to the author/copyright holder.
@@ -102,12 +102,8 @@
 					self.$scrollWrapper.removeStyle('left');
 				} else {
 					delete self.preOffset;
-					self.$scrollWrapper.removeStyle(self.prefix+'transition, transition, '+self.prefix+'transform, transform');
+					self.$scrollWrapper.removeStyle('transition transform', self.prefix);
 				};
-				
-				
-				
-				
 			},
 			carouselBuild: function(){
 				var self = this;
