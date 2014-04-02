@@ -19,7 +19,7 @@
 				var search = new RegExp(this.toString() + '[^;]+;?', 'g');
 				$obj.attr('style', function(i, style){
 					if(style) return style.replace(search, '');
-			    });
+				});
 			});
 			if(typeof $obj.attr('style') !== 'undefined'){
 				var cleanStyle = $.trim($obj.attr('style').replace(/\s{2,}/g, ' '));
@@ -29,7 +29,7 @@
 				};
 			}
 		});
-    };
+	};
 
 	function prefix(el){
 		var prefixes = ["Webkit", "Moz", "O", "ms"];
@@ -120,7 +120,7 @@
 			};
 		},
 		handlers: {
-			default: function(){
+			index: function(){
 				var self = this;
 				self.$container.find('.pager').on('click',function(){
 					var target = $(this).attr('data-target');
