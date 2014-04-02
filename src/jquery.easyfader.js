@@ -7,9 +7,9 @@
 * Author: Patrick Kunka
 * Copyright 2013 Patrick Kunka, All Rights Reserved
 */
-	
+
 (function($){
-	
+
 	$.fn.removeStyle = function(style){
 		return this.each(function(){
 			var $obj = $(this);
@@ -35,12 +35,12 @@
 		var prefixes = ["Webkit", "Moz", "O", "ms"];
 		for (var i = 0; i < prefixes.length; i++){
 			if (prefixes[i] + "Transition" in el.style){
-				return '-'+prefixes[i].toLowerCase()+'-'; 
+				return '-'+prefixes[i].toLowerCase()+'-';
 			};
-		}; 
+		};
 		return "transition" in el.style ? "" : false;
 	};
-	
+
 	EasyFader = function(){
 		this.slideDur = 7000,
 		this.effectDur = 800,
@@ -61,18 +61,18 @@
 		this.$pagerList = null,
 		this.$pagers = null;
 	};
-	
+
 	EasyFader.prototype = {
 		constructor: EasyFader,
 		instances: {},
 		init: function(domNode, settings){
 			var self = this;
-			
+
 			if(settings){
 				$.extend(self, settings);
 			};
 			self.$container = $(domNode);
-			
+
 			self.$slides = self.$container.find(self.slideSelector);
 			self.totalSlides = self.$slides.length;
 			self.$pagerList = self.$container.find('.'+self.pagerListClass);
@@ -83,7 +83,7 @@
 						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
 				};
 				self.bindHandlers();
-				
+
 			};
 			if(typeof self[self.effect+'Init'] !== 'undefined'){
 				self[self.effect+'Init']();
@@ -94,16 +94,16 @@
 			self.updateInfo();
 			self.$pagers = self.$pagerList.find('.pager');
 			self.$pagers.eq(self.activeIndex).addClass('active');
-			
+
 			if(self.fadeOnLoad){
 				self.fadeSlides(self.activeIndex+1, 0);
 			} else if(self.autoCycle && self.totalSlides > 1){
 				self.waitForNext();
-			};	
+			};
 		},
 		updateInfo: function(){
 			var self = this;
-			
+
 			self.info = {
 				$container: self.$container,
 				effect: self.effect,
@@ -114,7 +114,7 @@
 		},
 		bindHandlers: function(){
 			var self = this;
-			
+
 			for(key in self.handlers){
 				self.handlers[key].apply(self);
 			};
@@ -137,7 +137,7 @@
 				});
 			}
 		},
-		
+
 		cleanUp: function(activeNdx, newNdx){
 			var self = this;
 			if(self.firstLoad && self.fadeOnLoad){
@@ -168,8 +168,8 @@
 		},
 		animateSlides: function(activeNdx, newNdx){
 			var self = this;
-			
-			if(self.changing){
+
+			if(self.changing || activeNdx == newNdx){
 				return false;
 			};
 			self.changing = true;
@@ -177,17 +177,17 @@
 			if(typeof self.onChangeStart == 'function' && !self.firstLoad){
 				self.onChangeStart.call(this, self.info);
 			};
-			
+
 			self[self.effect+'Slides'](activeNdx, newNdx);
 		},
 		fadeSlides: function(activeNdx, newNdx){
 			var self = this;
-			
+
 			self.$slides.eq(activeNdx).css('z-index', 2);
 			self.$slides.eq(newNdx).css('z-index', 3);
 			if(!self.prefix){
 				self.$slides.eq(newNdx).animate(
-					{'opacity': 1}, 
+					{'opacity': 1},
 					self.effectDur,
 					function(){
 						self.cleanUp(activeNdx, newNdx);
@@ -205,7 +205,7 @@
 		},
 		_changeSlides: function(target){
 			var self = this;
-			
+
 			if(target == 'next'){
 				self.newSlide = (self.activeIndex * 1) + 1;
 				if(self.newSlide > self.totalSlides - 1){
@@ -219,7 +219,7 @@
 			} else {
 				self.newSlide = target;
 			};
-			
+
 			self.animateSlides(self.activeIndex, self.newSlide);
 		},
 		waitForNext: function(){
@@ -231,14 +231,14 @@
 		getPrefixedCSS: function(property, value, prefixValue){
 			var self = this,
 				styles = {};
-			
+
 			for(i = 0; i < 2; i++){
 				var prefix = i == 0 ? self.prefix : '';
 				prefixValue ? styles[prefix+property] = prefix+value : styles[prefix+property] = value;
 			};
 			return styles;
 		},
-	
+
 		pause: function(){
 			var self = this;
 
@@ -249,30 +249,30 @@
 			var self = this;
 
 			if(self.autoCycle){
-				wait ? self.waitForNext() : self._changeSlides('next');	
+				wait ? self.waitForNext() : self._changeSlides('next');
 			};
 		},
 		changeSlides: function(dir, callback){
 			var self = this;
 				self.callback = callback;
-				
+
 			dir = typeof dir !== 'undefined' ? dir : 'next';
-		
+
 			clearTimeout(self.slideTimer);
-			self._changeSlides(dir);	
+			self._changeSlides(dir);
 		},
 		getOption: function(option){
 			var self = this;
-			
+
 			return self[option];
 		},
 		setOptions: function(options){
 			var self = this;
-			
+
 			$.extend(self, options);
 		}
 	};
-	
+
 	$.fn.easyFader = function(){
 		var args = arguments,
 			rand = function(){
@@ -280,7 +280,7 @@
 			},
 			dataReturn = [],
 			eachReturn;
-			
+
 		eachReturn = this.each(function(){
 			if(args && typeof args[0] === 'string'){
 				var data = EasyFader.prototype.instances[this.id][args[0]](args[1], args[2]);
@@ -294,7 +294,7 @@
 				};
 			};
 		});
-		
+
 		if(dataReturn.length){
 			return dataReturn.length > 1 ? dataReturn : dataReturn[0];
 		} else {
