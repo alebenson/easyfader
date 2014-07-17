@@ -51,6 +51,7 @@
 		this.effect = 'fade',
 		this.pagerListClass = 'pager-list',
 		this.pagerListElement = 'span',
+		this.enableKey = false,
 		this.fadeOnLoad = true,
 		this.firstLoad = true,
 		this.autoCycle = true,
@@ -133,14 +134,16 @@
 					clearTimeout(self.slideTimer);
 					self._changeSlides(target);
 				});
-				$(window).on('keydown', function(e){
-					var key = e.keyCode;
-					if(key == 39 || key == 37){
-						var dir = key == 39 ? 'next' : 'prev';
-						clearTimeout(self.slideTimer);
-						self._changeSlides(dir);
-					};
-				});
+		    		if (self.enableKey) {
+					$(window).on('keydown', function(e){
+						var key = e.keyCode;
+						if(key == 39 || key == 37){
+							var dir = key == 39 ? 'next' : 'prev';
+							clearTimeout(self.slideTimer);
+							self._changeSlides(dir);
+						};
+					});
+				};
 			}
 		},
 
