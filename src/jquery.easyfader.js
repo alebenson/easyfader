@@ -51,6 +51,7 @@
 		this.effect = 'fade',
 		this.pagerListClass = 'pager-list',
 		this.pagerListElement = 'span',
+		this.pauseOnHover = true,
 		this.enableKey = false,
 		this.fadeOnLoad = true,
 		this.firstLoad = true,
@@ -142,6 +143,14 @@
 							clearTimeout(self.slideTimer);
 							self._changeSlides(dir);
 						};
+					});
+				};
+				if (self.pauseOnHover) {
+					self.$container.mouseenter(function() {
+						self.pause();
+					})
+					.mouseleave(function() {
+						self.play(true);
 					});
 				};
 			}
