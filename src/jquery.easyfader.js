@@ -52,6 +52,7 @@
 		this.pagerListClass = 'pager-list',
 		this.pagerListElement = 'span',
 		this.pauseOnHover = true,
+		this.nextOnClick = false,
 		this.enableKey = false,
 		this.fadeOnLoad = true,
 		this.firstLoad = true,
@@ -145,14 +146,23 @@
 						};
 					});
 				};
-				if (self.pauseOnHover) {
+				if(self.pauseOnHover && self.autoCycle){
 					self.$container.mouseenter(function() {
-						self.pause();
+						clearTimeout(self.slideTimer);
+						self.autoCycle = false;
 					})
 					.mouseleave(function() {
-						self.play(true);
+						self.autoCycle = true;
+						self.waitForNext();
+					})
+				};
+				if (self.nextOnClick) {
+					self.$container.click(function() {
+						self._changeSlides('next');
+						clearTimeout(self.slideTimer);
 					});
 				};
+
 			}
 		},
 
@@ -261,7 +271,6 @@
 			var self = this;
 
 			clearTimeout(self.slideTimer);
-			//self.autoCycle = false;
 		},
 		play: function(wait){
 			var self = this;
