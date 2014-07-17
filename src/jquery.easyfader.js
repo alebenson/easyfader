@@ -50,6 +50,7 @@
 		this.changing = false,
 		this.effect = 'fade',
 		this.pagerListClass = 'pager-list',
+		this.pagerListElement = 'span',
 		this.fadeOnLoad = true,
 		this.firstLoad = true,
 		this.autoCycle = true,
@@ -79,8 +80,13 @@
 			self.prefix = $.support.leadingWhitespace ? prefix(self.$container[0]) : false;
 			if(self.totalSlides > 1){
 				for(var i = 0; i < self.totalSlides; i++){
+					pagerItem = document.createElement(self.pagerListElement)
+						$(pagerItem).addClass('pager')
+						.attr('data-target',i)
+						.html(i+1);
 					self.$pagerList
-						.append('<li class="pager" data-target="'+i+'">'+(i+1)+'</li>');
+						.append(pagerItem);
+
 				};
 				self.bindHandlers();
 
